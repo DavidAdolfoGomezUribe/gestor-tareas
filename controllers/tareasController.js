@@ -76,14 +76,19 @@ export async function listarTareas() {
 
 
 export async function editarTarea() {
-  if (tareas.length === 0) return console.log('⚠️ No hay tareas para editar.');
+  
+  const PATH = "./biblioteca/tareas.json"
+  const respuesta = await fs.readFile(PATH);
+  const data = JSON.parse(respuesta)
+
+  if (data.length === 0) return console.log('⚠️ No hay tareas para editar.');
 
   const { indice } = await inquirer.prompt([
     {
       type: 'list',
       name: 'indice',
       message: 'Selecciona una tarea para editar:',
-      choices: tareas.map((t, i) => ({
+      choices: data.map((t, i) => ({
         name: t.descripcion,
         value: i
       }))
@@ -94,11 +99,14 @@ export async function editarTarea() {
     { type: 'input', name: 'nuevaDescripcion', message: 'Nueva descripción:' }
   ]);
 
-  tareas[indice].descripcion = nuevaDescripcion.trim();
+
+  data[indice].descripcion = nuevaDescripcion.trim();
+  await fs.writeFile(PATH, JSON.stringify(data, null, 4));
   console.log('✏️ Tarea actualizada.');
 }
 
 export async function eliminarTarea() {
+  await fs.writeFile(PATH, JSON.stringify(data, null, 4));
   if (tareas.length === 0) return console.log('⚠️ No hay tareas para eliminar.');
 
   const { indice } = await inquirer.prompt([
@@ -114,5 +122,7 @@ export async function eliminarTarea() {
   ]);
 
   tareas.splice(indice, 1);
+
+
   console.log('🗑️ Tarea eliminada.');
 }

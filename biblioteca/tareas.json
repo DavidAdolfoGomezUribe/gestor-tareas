@@ -1,7 +1,7 @@
 [
     {
         "id": 1753291149968,
-        "descripcion": "comer",
+        "descripcion": "saltar",
         "completada": false
     },
     {
@@ -12,6 +12,21 @@
     {
         "id": 1753291254288,
         "descripcion": "bañarse",
+        "completada": false
+    },
+    {
+        "id": 1753291863198,
+        "descripcion": "correr",
+        "completada": false
+    },
+    {
+        "id": 1753291872381,
+        "descripcion": "a",
+        "completada": false
+    },
+    {
+        "id": 1753291887004,
+        "descripcion": "a",
         "completada": false
     }
 ]
