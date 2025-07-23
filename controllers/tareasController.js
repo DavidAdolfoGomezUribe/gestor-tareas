@@ -106,22 +106,27 @@ export async function editarTarea() {
 }
 
 export async function eliminarTarea() {
-  await fs.writeFile(PATH, JSON.stringify(data, null, 4));
-  if (tareas.length === 0) return console.log('⚠️ No hay tareas para eliminar.');
+  const PATH = "./biblioteca/tareas.json"
+  const respuesta = await fs.readFile(PATH);
+  const data = JSON.parse(respuesta)
+
+  
+  if (data.length === 0) return console.log('⚠️ No hay tareas para eliminar.');
 
   const { indice } = await inquirer.prompt([
     {
       type: 'list',
       name: 'indice',
       message: 'Selecciona una tarea para eliminar:',
-      choices: tareas.map((t, i) => ({
+      choices: data.map((t, i) => ({
         name: t.descripcion,
         value: i
       }))
     }
   ]);
 
-  tareas.splice(indice, 1);
+  data.splice(indice, 1);
+  await fs.writeFile(PATH, JSON.stringify(data, null, 4));
 
 
   console.log('🗑️ Tarea eliminada.');
