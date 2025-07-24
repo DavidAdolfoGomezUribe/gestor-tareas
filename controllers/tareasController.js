@@ -1,14 +1,9 @@
 import inquirer from 'inquirer';
 import { tareas } from '../data/tareas.js';
-
 import fs from 'fs/promises';
+import _ from 'lodash';
 
 const PATH = "./biblioteca/tareas.json"
-
-
-//agreagar tareas 
-
-//funcion asincrona para guardar tareas  en JSON
 
 async function guardarTareaEnJSON(tarea, ruta) {
   try {
@@ -24,6 +19,7 @@ async function guardarTareaEnJSON(tarea, ruta) {
     }
 
     tareasExistentes.push(tarea);
+    tareasExistentes = _.uniqBy(tareasExistentes, 'descripcion');
 
     await fs.writeFile(ruta, JSON.stringify(tareasExistentes, null, 4));
     console.log("📝 Tarea guardada en archivo JSON.");
@@ -33,7 +29,6 @@ async function guardarTareaEnJSON(tarea, ruta) {
   }
 }
 
-// Función principal para agregar tarea
 export async function agregarTarea() {
   const { descripcion } = await inquirer.prompt([
     {
@@ -42,6 +37,11 @@ export async function agregarTarea() {
       message: 'Descripción de la tarea:',
     },
   ]);
+
+  if (_.isEmpty(descripcion.trim())) {
+    console.log("⚠️ La descripción no puede estar vacía.");
+    return;
+  }
 
   const nuevaTarea = {
     id: Date.now(),
@@ -54,32 +54,27 @@ export async function agregarTarea() {
 
   await guardarTareaEnJSON(nuevaTarea, PATH);
 }
-//listar tareas ,deberia leer json
 
 export async function listarTareas() {
-
-  const PATH = "./biblioteca/tareas.json"
   const respuesta = await fs.readFile(PATH);
-  const data = JSON.parse(respuesta)
+  const data = JSON.parse(respuesta);
   if (data.length === 0) {
     console.log('📭 No hay tareas registradas.');
     return;
   }
 
+  const ordenadas = _.orderBy(data, ['completada', 'id'], ['asc', 'desc']);
+
   console.log('\n📋 Lista de tareas:');
-  data.forEach((data, i) => {
-    const estado = data.completada ? '✅' : '❌';
-    console.log(`${i + 1}. [${estado}] ${data.descripcion}`);
+  ordenadas.forEach((t, i) => {
+    const estado = t.completada ? '✅' : '❌';
+    console.log(`${i + 1}. [${estado}] ${t.descripcion}`);
   });
 }
 
-
-
 export async function editarTarea() {
-  
-  const PATH = "./biblioteca/tareas.json"
   const respuesta = await fs.readFile(PATH);
-  const data = JSON.parse(respuesta)
+  const data = JSON.parse(respuesta);
 
   if (data.length === 0) return console.log('⚠️ No hay tareas para editar.');
 
@@ -99,18 +94,15 @@ export async function editarTarea() {
     { type: 'input', name: 'nuevaDescripcion', message: 'Nueva descripción:' }
   ]);
 
-
   data[indice].descripcion = nuevaDescripcion.trim();
   await fs.writeFile(PATH, JSON.stringify(data, null, 4));
   console.log('✏️ Tarea actualizada.');
 }
 
 export async function eliminarTarea() {
-  const PATH = "./biblioteca/tareas.json"
   const respuesta = await fs.readFile(PATH);
-  const data = JSON.parse(respuesta)
+  const data = JSON.parse(respuesta);
 
-  
   if (data.length === 0) return console.log('⚠️ No hay tareas para eliminar.');
 
   const { indice } = await inquirer.prompt([
@@ -127,7 +119,5 @@ export async function eliminarTarea() {
 
   data.splice(indice, 1);
   await fs.writeFile(PATH, JSON.stringify(data, null, 4));
-
-
   console.log('🗑️ Tarea eliminada.');
 }
